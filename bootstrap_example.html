@@ -298,21 +298,21 @@ colnames(results.b)=c(&quot;Bootstrap Value&quot;,&quot;Bootstrap SE&quot;)
 results=cbind(results_an,results.b)
 results</code></pre>
 <pre><code>##                           Value           SE Bootstrap Value Bootstrap SE
-## Mean               0.0040263314 1.967122e-03    0.0040214750 1.916107e-03
-## Variance           0.0001199566 3.046901e-05    0.0001161742 3.555322e-05
-## Standard Deviation 0.0109524706 1.390965e-03    0.0106453274 1.688638e-03</code></pre>
+## Mean               0.0040263314 1.967122e-03    0.0040174837 1.925269e-03
+## Variance           0.0001199566 3.046901e-05    0.0001155306 3.607908e-05
+## Standard Deviation 0.0109524706 1.390965e-03    0.0106105925 1.716463e-03</code></pre>
 <p>As you can see, the bootstrap values are very close to the analytical values. The degree of non-normality is small enough that they didn’t move much. You will notice, however, that the standard error estimates for variance and standard deviation are both somewhat larger.</p>
 <p>Let’s calculate the probability that the annual return is greater than 0. In this case, we are calculating what we believe the annualized return would be if we held the asset for a long time.</p>
 <p>In order to calculate the annual return, we need to convert to geometric returns before compounding. While a number of methods are found to solve this, we will use a simple version (illustrated at William Sharpe’s website (<a href="https://web.stanford.edu/~wfsharpe/mia/rr/mia_rr3.htm" class="uri">https://web.stanford.edu/~wfsharpe/mia/rr/mia_rr3.htm</a>)</p>
 <p>(1+g)^n = ((1+r)^2 - sd^2) ^ (n/2)</p>
 <p>We will use the bootstrap results to do this.</p>
-<pre class="r"><code>ann_mu=-1+((1+b.muhat+b.se.muhat)*(1+b.muhat-b.se.muhat))^6
-ann_sd=b.se.muhat*sqrt(12)</code></pre>
-<p>The annual expected return is 0.0493166 The estimated annual standard deviation is 0.0066376</p>
+<pre class="r"><code>ann_mu=-1+((1+b.muhat+b.sdhat)*(1+b.muhat-b.sdhat))^6
+ann_sd=b.sdhat*sqrt(12)</code></pre>
+<p>The annual expected return is 0.0485865 The estimated annual standard deviation is 0.0367562</p>
 <p>Now let’s calculate the probability that the annual expected return is greater than zero.</p>
 <pre class="r"><code>pnorm(0,ann_mu,ann_sd)</code></pre>
-<pre><code>## [1] 5.43435e-14</code></pre>
-<p>We see a highly significant result that the returns of this strategy are positive in the long run.</p>
+<pre><code>## [1] 0.09310742</code></pre>
+<p>We see about a 9% chance that the return is less than 0.</p>
 <p>But what about in any one year? That’s a different problem. It’s more like drawing just 12 balls from the urn of possible monthly returns. Let’s bootstrap that statistic and see what it tells us.</p>
 <pre class="r"><code>b.ann_mu=vector()
 for (i in 1:nr) {
@@ -321,12 +321,13 @@ for (i in 1:nr) {
 }</code></pre>
 <p>First, let’s just look at the percentage of the resamples that have a negative return.</p>
 <pre class="r"><code>(sum(b.ann_mu&lt;0))/nr</code></pre>
-<pre><code>## [1] 0.0957</code></pre>
+<pre><code>## [1] 0.0907</code></pre>
 <p>So, 9% of the time we experience annual return less than 0.</p>
 <p>Let’s calculate the same thing as a quantile from the calculated mean and standard deviation of the resamples.</p>
 <pre class="r"><code>pnorm(0,mean(b.ann_mu),sd(b.ann_mu))</code></pre>
-<pre><code>## [1] 0.1048157</code></pre>
+<pre><code>## [1] 0.09947208</code></pre>
 <p>We get 10% calculating it this way. Pretty close.</p>
+<p>We’ve calculated the probability of a return less than zero and got about the same answer each time.</p>
 </div>
 <div id="final-question" class="section level3">
 <h3>Final question</h3>

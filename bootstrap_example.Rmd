@@ -118,8 +118,8 @@ In order to calculate the annual return, we need to convert to geometric returns
 We will use the bootstrap results to do this.
 
 ```{r}
-ann_mu=-1+((1+b.muhat+b.se.muhat)*(1+b.muhat-b.se.muhat))^6
-ann_sd=b.se.muhat*sqrt(12)
+ann_mu=-1+((1+b.muhat+b.sdhat)*(1+b.muhat-b.sdhat))^6
+ann_sd=b.sdhat*sqrt(12)
 ```
 
 The annual expected return is `r ann_mu`
@@ -131,7 +131,7 @@ Now let's calculate the probability that the annual expected return is greater t
 pnorm(0,ann_mu,ann_sd)
 ```
 
-We see a highly significant result that the returns of this strategy are positive in the long run.
+We see about a 9% chance that the return is less than 0.  
 
 But what about in any one year?  That's a different problem.  It's more like drawing just 12 balls from the urn of possible monthly returns.  Let's bootstrap that statistic and see what it tells us.
 
@@ -158,6 +158,8 @@ pnorm(0,mean(b.ann_mu),sd(b.ann_mu))
 ```
 
 We get 10% calculating it this way.  Pretty close.
+
+We've calculated the probability of a return less than zero and got about the same answer each time.
 
 ### Final question
 
