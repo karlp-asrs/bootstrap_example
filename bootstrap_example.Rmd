@@ -1,0 +1,167 @@
+---
+title: "Bootstrapping"
+author: "Karl Polen"
+date: "May 15, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(fBasics)
+library(ggpubr)
+```
+
+Bootstrapping is a useful tool for understanding properties of your data, especially when you suspect your data may not be normally distributed.  We are big fans of bootstrapping.  Basically, you can't go wrong.   Even if your data are normally distributed, you won't be hurt by bootstrapping.
+
+The theory of bootstrapping is explained in these excellent [youtube videos](https://www.youtube.com/watch?v=STGGniMV0jg).
+
+### Analytical methods
+
+First, get data.  We are using a small data set of only 31 observations.
+
+```{r}
+mydat=read.csv("some_excess_returns.csv")
+mydat=mydat[,2]
+n=length(mydat)
+mydat
+```
+
+Now we will calculate the mean, variance and standard deviation and standard errors for each of these by standard analytical methods which presume normality.
+
+```{r}
+muhat=mean(mydat)
+varhat=var(mydat)
+sdhat=sd(mydat)
+se.muhat=sdhat/sqrt(n)
+se.varhat=varhat/sqrt(n/2)
+se.sdhat=sdhat/sqrt(2*n)
+results_an=matrix(c(muhat,varhat,sdhat,se.muhat,se.varhat,se.sdhat),nrow=3,ncol=2)
+rownames(results_an)=c("Mean","Variance","Standard Deviation")
+colnames(results_an)=c("Value","SE")
+results_an
+```
+
+### Tests of Normality
+
+Let's examine the assumption of normality.  Three options here. First, look at basic stats and examine skew and kurtosis.  Next, visually examine a density plot and "QQ" plot.  Finally, consider statistical tests.
+
+```{r}
+basicStats(mydat)
+```
+
+What you are looking for here is an absolute value of skewness which greater than 1/2.  In this case, the data are somewhat positively skewed.  With kurtosis of less than 3, the values are not especially fat tailed.
+
+Now we examine the plots, which confirm what we already know from the statistics.
+
+```{r}
+ggdensity(mydat)
+ggqqplot(mydat)
+```
+
+Finally, if you want to, you can do statistical tests of normality such as the Shapiro-Wilk's method.  
+
+```{r}
+shapiro.test(mydat)
+```
+
+The p-value represents the probability that the data are normal.  In this case, we have a statistically significant result that this is not a normal distribution.
+
+### Test for auto-correlation
+
+So, given that we are pretty sure the data are not normally distributed, bootstrapping to determine statistical properties is a good idea.  One last test, before we proceed.  We want to know that the data are not serially correlated before we bootstrap.  If auto-correlation is present, then bootstrapping is problematic and you need additional processing of your data before you can proceed.
+
+Here is a test of autocorrelation.
+
+```{r}
+acf(mydat)
+```
+
+All the calculations (except 0 lag) are inside the blue lines, so the data are not auto-correlated.
+
+### Bootstrapping
+
+At last, we are ready to bootstrap.  We will calculate bootstrap values and standard errors for mean, variance and standard deviation.
+
+```{r}
+b.mu=vector()
+b.var=vector()
+b.sd=vector()
+nr=10000
+for (i in 1:nr) {
+  resamp=sample(mydat,n,replace=TRUE)
+  b.mu[i]=mean(resamp)
+  b.var[i]=var(resamp)
+  b.sd[i]=sd(resamp)
+}
+b.muhat=mean(b.mu)
+b.varhat=mean(b.var)
+b.sdhat=mean(b.sd)
+b.se.muhat=sd(b.mu)
+b.se.varhat=sd(b.var)
+b.se.sdhat=sd(b.sd)
+results.b=matrix(c(b.muhat,b.varhat,b.sdhat,b.se.muhat,b.se.varhat,b.se.sdhat),nrow=3,ncol=2)
+rownames(results.b)=c("Mean","Variance","Standard Deviation")
+colnames(results.b)=c("Bootstrap Value","Bootstrap SE")
+results=cbind(results_an,results.b)
+results
+```
+
+As you can see, the bootstrap values are very close to the analytical values.  The degree of non-normality is small enough that they didn't move much.  You will notice, however, that the standard error estimates for variance and standard deviation are both somewhat larger.
+
+Let's calculate the probability that the annual return is greater than 0.  In this case, we are calculating what we believe the annualized return would be if we held the asset for a long time.
+
+In order to calculate the annual return, we need to convert to geometric returns before compounding.  While a number of methods are found to solve this, we will use a simple version (illustrated at William Sharpe's website (https://web.stanford.edu/~wfsharpe/mia/rr/mia_rr3.htm)
+
+(1+g)^n = ((1+r)^2 - sd^2) ^ (n/2)
+
+We will use the bootstrap results to do this.
+
+```{r}
+ann_mu=-1+((1+b.muhat+b.se.muhat)*(1+b.muhat-b.se.muhat))^6
+ann_sd=b.se.muhat*sqrt(12)
+```
+
+The annual expected return is `r ann_mu`
+The estimated annual standard deviation is `r ann_sd`
+
+Now let's calculate the probability that the annual expected return is greater than zero.
+
+```{r}
+pnorm(0,ann_mu,ann_sd)
+```
+
+We see a highly significant result that the returns of this strategy are positive in the long run.
+
+But what about in any one year?  That's a different problem.  It's more like drawing just 12 balls from the urn of possible monthly returns.  Let's bootstrap that statistic and see what it tells us.
+
+```{r}
+b.ann_mu=vector()
+for (i in 1:nr) {
+  resamp=sample(mydat,12,replace=TRUE)
+  b.ann_mu[i]=-1+prod(1+resamp)
+}
+```
+
+First, let's just look at the percentage of the resamples that have a negative return.
+
+```{r}
+(sum(b.ann_mu<0))/nr
+```
+
+So, 9% of the time we experience annual return less than 0.
+
+Let's calculate the same thing as a quantile from the calculated mean and standard deviation of the resamples.
+
+```{r}
+pnorm(0,mean(b.ann_mu),sd(b.ann_mu))
+```
+
+We get 10% calculating it this way.  Pretty close.
+
+### Final question
+
+One thing I am uncertain of is whether there should be any adjustment for bootstrap results based on size of the orginal.  The calculations I've shown here are what I find in text books.  But it seems that the size of the original sample in understanding the bootstrap results.  In this case, I'm looking at an investment strategy where I only have 31 months of live data to analyze.  If I think about my confidence in this strategy compared to one where you have, say, 10 years of monthly data, shouldn't I have more confidence in the robustness of my analysis for the strategy with more data?  
+
+I've looked around and haven't found anything on this.  Anybody have some advice on this?
+
