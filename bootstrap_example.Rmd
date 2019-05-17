@@ -175,7 +175,7 @@ We've calculated the probability of a return less than zero and got about the sa
 
 ### Final question
 
-One thing I am uncertain of is whether there should be any adjustment for bootstrap results based on size of the orginal.  The calculations I've shown here are what I find in text books.  But it seems that the size of the original sample in understanding the bootstrap results.  In this case, I'm looking at an investment strategy where I only have 31 months of live data to analyze.  If I think about my confidence in this strategy compared to one where you have, say, 10 years of monthly data, shouldn't I have more confidence in the robustness of my analysis for the strategy with more data?  
+One thing I am uncertain of is whether there should be any adjustment for bootstrap results based on size of the orginal sample.  The calculations I've shown here are what I find in text books.  But it seems that the size of the original sample should matter in understanding the bootstrap results.  In this case, I'm looking at an investment strategy where I only have 31 months of live data to analyze.  If I think about my confidence in this strategy compared to one where you have, say, 10 years of monthly data, shouldn't I have more confidence in the robustness of my analysis for the strategy with more data?  
 
 I've looked around and haven't found anything on this.  Anybody have some advice on this?
 

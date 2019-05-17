@@ -298,9 +298,9 @@ colnames(results.b)=c(&quot;Bootstrap Value&quot;,&quot;Bootstrap SE&quot;)
 results=cbind(results_an,results.b)
 results</code></pre>
 <pre><code>##                           Value           SE Bootstrap Value Bootstrap SE
-## Mean               0.0040263314 1.967122e-03    0.0040002793 1.940887e-03
-## Variance           0.0001199566 3.046901e-05    0.0001157517 3.589065e-05
-## Standard Deviation 0.0109524706 1.390965e-03    0.0106219789 1.710429e-03</code></pre>
+## Mean               0.0040263314 1.967122e-03    0.0040051483 1.911112e-03
+## Variance           0.0001199566 3.046901e-05    0.0001160104 3.594851e-05
+## Standard Deviation 0.0109524706 1.390965e-03    0.0106349892 1.705191e-03</code></pre>
 <p>As you can see, the bootstrap values are very close to the analytical values. The degree of non-normality is small enough that they didn’t move much. You will notice, however, that the standard error estimates for variance and standard deviation are both somewhat larger.</p>
 <p>Let’s calculate the probability that the annual return is greater than 0. In this case, we are calculating what we believe the annualized return would be if we held the asset for a long time.</p>
 <p>In order to calculate the annual return, we need to convert to geometric returns before compounding. While a number of methods are found to solve this, we will use a simple version (illustrated at William Sharpe’s website (<a href="https://web.stanford.edu/~wfsharpe/mia/rr/mia_rr3.htm" class="uri">https://web.stanford.edu/~wfsharpe/mia/rr/mia_rr3.htm</a>)</p>
@@ -309,16 +309,16 @@ results</code></pre>
 <pre class="r"><code>ann_mu=-1+((1+b.muhat+b.sdhat)*(1+b.muhat-b.sdhat))^6
 ann_se.mu=b.se.muhat*sqrt(12)
 ann_sd=b.sdhat*sqrt(12)</code></pre>
-<p>The annual expected return is 0.0483694.<br />
-The standard error for the estimate of the annual return is 0.0067234.<br />
-The estimated annual standard deviation is 0.0367956.</p>
+<p>The annual expected return is 0.0484287.<br />
+The standard error for the estimate of the annual return is 0.0066203.<br />
+The estimated annual standard deviation is 0.0368407.</p>
 <p>Now let’s calculate the probability that the annual expected return is less than zero.</p>
 <pre class="r"><code>pnorm(0,ann_mu,ann_se.mu)</code></pre>
-<pre><code>## [1] 3.14249e-13</code></pre>
+<pre><code>## [1] 1.285057e-13</code></pre>
 <p>We see a highly significant result that the annualized expected returns are positive on a long hold.</p>
 <p>For any given year, we calculate the probability of a negative return like this.</p>
 <pre class="r"><code>pnorm(0,ann_mu,ann_sd)</code></pre>
-<pre><code>## [1] 0.09433196</code></pre>
+<pre><code>## [1] 0.09433174</code></pre>
 <p>We see about a 9% chance that the return in any given year is less than 0.</p>
 <p>Let’s calculate it a different way. We can think of this like we are drawing 12 balls from the urn of possible monthly returns. Let’s bootstrap that statistic and see what it tells us.</p>
 <pre class="r"><code>b.ann_mu=vector()
@@ -328,17 +328,17 @@ for (i in 1:nr) {
 }</code></pre>
 <p>First, let’s just look at the percentage of the resamples that have a negative return.</p>
 <pre class="r"><code>(sum(b.ann_mu&lt;0))/nr</code></pre>
-<pre><code>## [1] 0.0896</code></pre>
+<pre><code>## [1] 0.0924</code></pre>
 <p>So, 9% of the time we experience annual return less than 0.</p>
 <p>Let’s calculate the same thing as a quantile from the calculated mean and standard deviation of the resamples.</p>
 <pre class="r"><code>pnorm(0,mean(b.ann_mu),sd(b.ann_mu))</code></pre>
-<pre><code>## [1] 0.1005877</code></pre>
+<pre><code>## [1] 0.1031938</code></pre>
 <p>We get 10% calculating it this way. Pretty close.</p>
 <p>We’ve calculated the probability of a return less than zero and got about the same answer each time.</p>
 </div>
 <div id="final-question" class="section level3">
 <h3>Final question</h3>
-<p>One thing I am uncertain of is whether there should be any adjustment for bootstrap results based on size of the orginal. The calculations I’ve shown here are what I find in text books. But it seems that the size of the original sample in understanding the bootstrap results. In this case, I’m looking at an investment strategy where I only have 31 months of live data to analyze. If I think about my confidence in this strategy compared to one where you have, say, 10 years of monthly data, shouldn’t I have more confidence in the robustness of my analysis for the strategy with more data?</p>
+<p>One thing I am uncertain of is whether there should be any adjustment for bootstrap results based on size of the orginal sample. The calculations I’ve shown here are what I find in text books. But it seems that the size of the original sample should matter in understanding the bootstrap results. In this case, I’m looking at an investment strategy where I only have 31 months of live data to analyze. If I think about my confidence in this strategy compared to one where you have, say, 10 years of monthly data, shouldn’t I have more confidence in the robustness of my analysis for the strategy with more data?</p>
 <p>I’ve looked around and haven’t found anything on this. Anybody have some advice on this?</p>
 </div>
 

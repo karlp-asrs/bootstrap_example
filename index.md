@@ -167,9 +167,9 @@ results
 
 ```
 ##                           Value           SE Bootstrap Value Bootstrap SE
-## Mean               0.0040263314 1.967122e-03    0.0040002793 1.940887e-03
-## Variance           0.0001199566 3.046901e-05    0.0001157517 3.589065e-05
-## Standard Deviation 0.0109524706 1.390965e-03    0.0106219789 1.710429e-03
+## Mean               0.0040263314 1.967122e-03    0.0040051483 1.911112e-03
+## Variance           0.0001199566 3.046901e-05    0.0001160104 3.594851e-05
+## Standard Deviation 0.0109524706 1.390965e-03    0.0106349892 1.705191e-03
 ```
 
 As you can see, the bootstrap values are very close to the analytical values.  The degree of non-normality is small enough that they didn't move much.  You will notice, however, that the standard error estimates for variance and standard deviation are both somewhat larger.
@@ -189,9 +189,9 @@ ann_se.mu=b.se.muhat*sqrt(12)
 ann_sd=b.sdhat*sqrt(12)
 ```
 
-The annual expected return is 0.0483694.  
-The standard error for the estimate of the annual return is 0.0067234.       
-The estimated annual standard deviation is 0.0367956.       
+The annual expected return is 0.0484287.  
+The standard error for the estimate of the annual return is 0.0066203.       
+The estimated annual standard deviation is 0.0368407.       
 
 Now let's calculate the probability that the annual expected return is less than zero.
 
@@ -201,7 +201,7 @@ pnorm(0,ann_mu,ann_se.mu)
 ```
 
 ```
-## [1] 3.14249e-13
+## [1] 1.285057e-13
 ```
 
 We see a highly significant result that the annualized expected returns are positive on a long hold.
@@ -214,7 +214,7 @@ pnorm(0,ann_mu,ann_sd)
 ```
 
 ```
-## [1] 0.09433196
+## [1] 0.09433174
 ```
 
 We see about a 9% chance that the return in any given year is less than 0.  
@@ -238,7 +238,7 @@ First, let's just look at the percentage of the resamples that have a negative r
 ```
 
 ```
-## [1] 0.0896
+## [1] 0.0924
 ```
 
 So, 9% of the time we experience annual return less than 0.
@@ -251,7 +251,7 @@ pnorm(0,mean(b.ann_mu),sd(b.ann_mu))
 ```
 
 ```
-## [1] 0.1005877
+## [1] 0.1031938
 ```
 
 We get 10% calculating it this way.  Pretty close.
@@ -260,7 +260,7 @@ We've calculated the probability of a return less than zero and got about the sa
 
 ### Final question
 
-One thing I am uncertain of is whether there should be any adjustment for bootstrap results based on size of the orginal.  The calculations I've shown here are what I find in text books.  But it seems that the size of the original sample in understanding the bootstrap results.  In this case, I'm looking at an investment strategy where I only have 31 months of live data to analyze.  If I think about my confidence in this strategy compared to one where you have, say, 10 years of monthly data, shouldn't I have more confidence in the robustness of my analysis for the strategy with more data?  
+One thing I am uncertain of is whether there should be any adjustment for bootstrap results based on size of the orginal sample.  The calculations I've shown here are what I find in text books.  But it seems that the size of the original sample should matter in understanding the bootstrap results.  In this case, I'm looking at an investment strategy where I only have 31 months of live data to analyze.  If I think about my confidence in this strategy compared to one where you have, say, 10 years of monthly data, shouldn't I have more confidence in the robustness of my analysis for the strategy with more data?  
 
 I've looked around and haven't found anything on this.  Anybody have some advice on this?
 
